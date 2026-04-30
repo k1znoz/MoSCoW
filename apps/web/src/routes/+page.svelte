@@ -3,6 +3,12 @@
 	import type {Answers} from '$lib/types'
 	import {buildDeliverables} from '$lib/deliverables'
 	import {buildMarkdown, buildPrintableHtml} from '$lib/exports'
+	import AppHeader from '$lib/components/AppHeader.svelte'
+	import SideNav from '$lib/components/SideNav.svelte'
+	import MobileNav from '$lib/components/MobileNav.svelte'
+	import ProgressBar from '$lib/components/ProgressBar.svelte'
+	import QuestionField from '$lib/components/QuestionField.svelte'
+	import SectionSummary from '$lib/components/SectionSummary.svelte'
 
 	const STORAGE_KEY = 'moscow_questionnaire_answers_v1'
 
@@ -48,34 +54,6 @@
 		return typeof value === 'string' ? value : ''
 	}
 
-	function answerAsBoolean(key: string): boolean {
-		return answers[key] === true
-	}
-
-	function answerAsArray(key: string): string[] {
-		const value = answers[key]
-		return Array.isArray(value) ? value : []
-	}
-
-	function updateString(key: string, value: string): void {
-		answers = {...answers, [key]: value}
-	}
-
-	function updateBoolean(key: string, value: boolean): void {
-		answers = {...answers, [key]: value}
-	}
-
-	function toggleOption(key: string, option: string): void {
-		const current = new Set(answerAsArray(key))
-		if (current.has(option)) {
-			current.delete(option)
-		} else {
-			current.add(option)
-		}
-
-		answers = {...answers, [key]: [...current]}
-	}
-
 	function sectionIsValid(index: number): boolean {
 		const section = sections[index]
 		return section.questions.every((question) => {
@@ -109,6 +87,14 @@
 	function previousSection(): void {
 		submissionStatus = ''
 		currentSectionIndex = Math.max(currentSectionIndex - 1, 0)
+	}
+
+	function goToSection(index: number): void {
+		submissionStatus = ''
+		currentSectionIndex = Math.max(0, Math.min(index, sections.length - 1))
+		if (typeof window !== 'undefined') {
+			window.scrollTo({top: 0, behavior: 'smooth'})
+		}
 	}
 
 	function downloadMarkdown(): void {
@@ -170,259 +156,152 @@
 	<title>MoSCoW - Questionnaire client</title>
 </svelte:head>
 
-<main class="page">
-	<header class="hero">
-		<p class="eyebrow">MoSCoW Intake</p>
-		<h1>Questionnaire client complet</h1>
-		<p>
-			Ce formulaire te permet de produire un dossier projet en Markdown + PDF et d envoyer une copie
-			exploitable dans Sanity Studio.
-		</p>
-	</header>
+<AppHeader />
+<SideNav {currentSectionIndex} onnavigate={goToSection} />
+<MobileNav {currentSectionIndex} onnavigate={goToSection} />
 
-	<section class="progress">
-		<span>Etape {currentSectionIndex + 1} / {sections.length}</span>
-		<strong>{currentSection.title}</strong>
-	</section>
+<!-- Decorative background gradient -->
+<div class="fixed bottom-0 right-0 w-1/3 h-2/3 pointer-events-none z-[-1] opacity-20 bg-gradient-to-tl from-orange-900/30 to-transparent blur-3xl"></div>
 
-	<section class="card">
-		{#each currentSection.questions as question}
-			<div class="field">
-				<label for={question.key}>
-					{question.label}
-					{#if question.required}
-						<span class="required">*</span>
-					{/if}
-				</label>
+<main class="lg:ml-64 pt-16 pb-24 md:pb-12 min-h-screen flex flex-col items-center relative">
+	<!-- Noise texture overlay -->
+	<div class="fixed inset-0 noise-overlay pointer-events-none z-0"></div>
 
-				{#if question.inputType === 'text' || question.inputType === 'date'}
-					<input
-						id={question.key}
-						type={question.inputType === 'date' ? 'date' : 'text'}
-						value={answerAsString(question.key)}
-						oninput={(event) => updateString(question.key, (event.currentTarget as HTMLInputElement).value)}
-					/>
-				{:else if question.inputType === 'textarea'}
-					<textarea
-						id={question.key}
-						rows="4"
-						oninput={(event) => updateString(question.key, (event.currentTarget as HTMLTextAreaElement).value)}
-					>{answerAsString(question.key)}</textarea>
-				{:else if question.inputType === 'select'}
-					<select
-						id={question.key}
-						value={answerAsString(question.key)}
-						onchange={(event) => updateString(question.key, (event.currentTarget as HTMLSelectElement).value)}
-					>
-						<option value="">Selectionner...</option>
-						{#each question.options ?? [] as option}
-							<option value={option}>{option}</option>
-						{/each}
-					</select>
-				{:else if question.inputType === 'boolean'}
-					<label class="boolean">
-						<input
-							type="checkbox"
-							checked={answerAsBoolean(question.key)}
-							onchange={(event) => updateBoolean(question.key, (event.currentTarget as HTMLInputElement).checked)}
+	<div class="max-w-container-max w-full px-gutter relative z-10">
+		<!-- Section header -->
+		<section class="mb-12 pt-8 border-l-4 border-primary-container pl-6">
+			<p class="font-label-sm text-label-sm text-secondary tracking-[0.2em] uppercase mb-2">
+				Étape {currentSectionIndex + 1} sur {sections.length}
+			</p>
+			<h1 class="font-h1 text-h1 text-on-surface leading-tight">{currentSection.title}</h1>
+		</section>
+
+		<!-- Heat-treatment progress gauge -->
+		<ProgressBar progress={Math.round((currentSectionIndex / (sections.length - 1)) * 100)} />
+
+		<!-- Questions grid: 8-col main + 4-col guidance sidebar -->
+		<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+			<!-- Main questions column -->
+			<div class="md:col-span-8 space-y-6">
+				{#each currentSection.questions as question}
+					<div class="bg-surface-container rounded-lg border border-outline-variant p-8 shadow-xl relative overflow-hidden group">
+						<div class="absolute top-0 left-0 w-full h-1 bg-primary-container/20 group-hover:bg-primary-container transition-colors duration-500"></div>
+
+						<h3 class="font-h3 text-h3 text-on-surface mb-6 flex items-center gap-3">
+							<span class="material-symbols-outlined text-primary-container">edit_note</span>
+							{question.label}
+							{#if question.required}
+								<span class="text-error text-xs ml-1">*</span>
+							{/if}
+						</h3>
+
+						<QuestionField
+							{question}
+							value={answers[question.key]}
+							onchange={(val) => {
+								answers = { ...answers, [question.key]: val }
+							}}
 						/>
-						<span>Oui</span>
-					</label>
-				{:else if question.inputType === 'multiselect'}
-					<div class="choices">
-						{#each question.options ?? [] as option}
-							<label>
-								<input
-									type="checkbox"
-									checked={answerAsArray(question.key).includes(option)}
-									onchange={() => toggleOption(question.key, option)}
-								/>
-								<span>{option}</span>
-							</label>
-						{/each}
+
+						{#if question.help}
+							<p class="text-xs text-on-surface-variant mt-4 italic flex items-center gap-2">
+								<span class="material-symbols-outlined text-sm">info</span>
+								{question.help}
+							</p>
+						{/if}
+					</div>
+				{/each}
+			</div>
+
+			<!-- Guidance sidebar -->
+			<div class="md:col-span-4 flex flex-col gap-gutter">
+				<!-- Conseil d'artisan -->
+				<div class="bg-surface-container-low border border-outline-variant p-6 rounded-lg">
+					<h4 class="font-label-sm text-primary mb-4 flex items-center gap-2">
+						<span class="material-symbols-outlined text-sm">lightbulb</span>
+						CONSEIL D'ARTISAN
+					</h4>
+					<div class="hammered-hr mb-4"></div>
+					<p class="text-sm text-on-surface-variant leading-relaxed italic">
+						"La clarté est le marteau qui façonne le succès. Répondez honnêtement pour obtenir un devis précis et adapté à votre projet."
+					</p>
+				</div>
+
+				<!-- MoSCoW chips or summary on last section -->
+				{#if isLastSection}
+					<SectionSummary {generated} />
+				{:else}
+					<div class="bg-surface-container-high border border-outline-variant p-6 rounded-lg relative overflow-hidden">
+						<div class="absolute -right-4 -bottom-4 opacity-10">
+							<span class="material-symbols-outlined text-8xl">local_fire_department</span>
+						</div>
+						<h4 class="font-label-sm text-secondary-fixed mb-2">MÉTHODE MOSCOW</h4>
+						<div class="flex flex-wrap gap-2 mt-4">
+							<span class="px-3 py-1 bg-primary text-on-primary font-label-sm rounded-full text-[10px] uppercase">Must: Clarté</span>
+							<span class="px-3 py-1 border border-secondary text-secondary font-label-sm rounded-full text-[10px] uppercase">Should: Précision</span>
+							<span class="px-3 py-1 border border-outline text-outline font-label-sm rounded-full text-[10px] uppercase">Could: Détails</span>
+						</div>
 					</div>
 				{/if}
-
-				{#if question.help}
-					<small>{question.help}</small>
-				{/if}
 			</div>
-		{/each}
-	</section>
+		</div>
 
-	<section class="actions">
-		<button onclick={previousSection} disabled={isFirstSection}>Precedent</button>
-		{#if !isLastSection}
-			<button class="primary" onclick={nextSection}>Suivant</button>
-		{:else}
-			<button class="primary" onclick={downloadMarkdown}>Telecharger MD</button>
-			<button class="secondary" onclick={openPrintableExport}>Imprimer en PDF</button>
-			<button class="primary" onclick={submitToSanity} disabled={isSubmitting}>
-				{isSubmitting ? 'Envoi en cours...' : 'Finaliser et envoyer dans Sanity'}
-			</button>
+		<!-- Navigation actions -->
+		<div class="mt-16 flex justify-between items-center border-t border-outline-variant pt-8">
+			{#if !isFirstSection}
+				<button
+					onclick={previousSection}
+					class="px-8 py-3 border border-outline-variant text-on-surface font-label-sm uppercase tracking-widest hover:bg-surface-bright transition-all active:scale-95 flex items-center gap-2"
+				>
+					<span class="material-symbols-outlined text-sm">arrow_back</span>
+					Précédent
+				</button>
+			{:else}
+				<div></div>
+			{/if}
+
+			{#if !isLastSection}
+				<button
+					onclick={nextSection}
+					class="px-10 py-4 bg-primary-container text-on-primary-fixed font-bold uppercase tracking-widest hot-glow transition-all active:scale-95 flex items-center gap-2 shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+				>
+					Suivant
+					<span class="material-symbols-outlined text-sm">arrow_forward</span>
+				</button>
+			{:else}
+				<div class="flex flex-wrap gap-3">
+					<button
+						onclick={downloadMarkdown}
+						class="px-6 py-3 border border-outline-variant text-on-surface font-label-sm uppercase tracking-widest hover:bg-surface-bright transition-all active:scale-95 flex items-center gap-2"
+					>
+						<span class="material-symbols-outlined text-sm">download</span>
+						Markdown
+					</button>
+					<button
+						onclick={openPrintableExport}
+						class="px-6 py-3 border border-outline-variant text-on-surface font-label-sm uppercase tracking-widest hover:bg-surface-bright transition-all active:scale-95 flex items-center gap-2"
+					>
+						<span class="material-symbols-outlined text-sm">print</span>
+						PDF
+					</button>
+					<button
+						onclick={submitToSanity}
+						disabled={isSubmitting}
+						class="px-10 py-4 bg-orange-600 text-white font-bold uppercase tracking-widest text-sm incandescent-glow transition-all active:scale-95 flex items-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{isSubmitting ? 'Envoi...' : 'Finaliser'}
+						<span class="material-symbols-outlined text-sm">send</span>
+					</button>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Status / error message -->
+		{#if submissionStatus}
+			<div class="mt-8 p-4 bg-surface-container border border-outline flex items-center gap-3">
+				<span class="material-symbols-outlined text-primary">info</span>
+				<p class="text-sm text-on-surface">{submissionStatus}</p>
+			</div>
 		{/if}
-	</section>
-
-	{#if isLastSection}
-		<section class="summary">
-			<h2>Synthese automatique</h2>
-			<p><strong>Sitemap:</strong> {generated.sitemap.join(' | ')}</p>
-			<p><strong>Must:</strong> {generated.moscow.must.length} items</p>
-			<p><strong>Risques:</strong> {generated.risks.length} points</p>
-		</section>
-	{/if}
-
-	{#if submissionStatus}
-		<p class="status">{submissionStatus}</p>
-	{/if}
+	</div>
 </main>
-
-<style>
-	:global(body) {
-		margin: 0;
-		background: radial-gradient(circle at top right, #fef2d6, #f4f7ec 40%, #f2f2f2 100%);
-		color: #222;
-		font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
-	}
-
-	.page {
-		max-width: 900px;
-		margin: 0 auto;
-		padding: 2rem 1rem 4rem;
-	}
-
-	.hero {
-		margin-bottom: 1.25rem;
-	}
-
-	.eyebrow {
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		font-size: 0.78rem;
-		color: #9a5b11;
-		margin-bottom: 0.25rem;
-	}
-
-	.hero h1 {
-		margin: 0;
-		font-size: 2rem;
-	}
-
-	.progress {
-		background: white;
-		border: 1px solid #e2e7e0;
-		border-radius: 10px;
-		padding: 0.75rem 1rem;
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 0.8rem;
-	}
-
-	.card {
-		background: white;
-		border-radius: 14px;
-		border: 1px solid #dfe5db;
-		padding: 1rem;
-	}
-
-	.field {
-		margin-bottom: 0.95rem;
-	}
-
-	label {
-		display: block;
-		font-weight: 600;
-		margin-bottom: 0.4rem;
-	}
-
-	input,
-	textarea,
-	select {
-		width: 100%;
-		box-sizing: border-box;
-		padding: 0.65rem;
-		border-radius: 8px;
-		border: 1px solid #c6d0c4;
-		font: inherit;
-		background: #fff;
-	}
-
-	.required {
-		color: #b41f00;
-	}
-
-	.boolean {
-		display: inline-flex;
-		gap: 0.5rem;
-		align-items: center;
-		font-weight: 500;
-	}
-
-	.choices {
-		display: grid;
-		gap: 0.4rem;
-	}
-
-	.choices label {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		font-weight: 500;
-		margin: 0;
-	}
-
-	.actions {
-		margin-top: 1rem;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.6rem;
-	}
-
-	button {
-		border: 0;
-		border-radius: 999px;
-		padding: 0.65rem 1rem;
-		font-weight: 700;
-		cursor: pointer;
-		background: #d9dfd7;
-	}
-
-	button.primary {
-		background: #0f766e;
-		color: white;
-	}
-
-	button.secondary {
-		background: #d97706;
-		color: white;
-	}
-
-	button:disabled {
-		opacity: 0.65;
-		cursor: not-allowed;
-	}
-
-	.summary {
-		margin-top: 1rem;
-		background: #f6faf4;
-		border: 1px solid #d8e6d2;
-		border-radius: 10px;
-		padding: 0.9rem;
-	}
-
-	.status {
-		margin-top: 1rem;
-		font-weight: 600;
-	}
-
-	@media (max-width: 640px) {
-		.progress {
-			display: grid;
-			gap: 0.25rem;
-		}
-
-		.actions button {
-			width: 100%;
-		}
-	}
-</style>
