@@ -1,0 +1,26 @@
+# Node dependencies
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/.svelte-kit/
+**/.sanity/
+
+# Environment files
+**/.env
+**/.env.*
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Temporary backup of nested git metadata
+apps/studio/.git-backup/
+
+# Imported chat transcript
+thu_apr_30_2026_client_facing_app_with_pdf_and_markdown.json
