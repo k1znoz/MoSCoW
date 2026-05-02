@@ -7,6 +7,11 @@ export type Question = {
   required?: boolean
   options?: string[]
   help?: string
+  projectTypes?: string[]
+  visibleWhen?: {
+    key: string
+    equals: string | boolean
+  }
 }
 
 export type QuestionSection = {

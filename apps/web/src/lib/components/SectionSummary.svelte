@@ -43,9 +43,16 @@
 		</div>
 		{#if generated.risks.length}
 			<div class="hammered-hr"></div>
-			<div class="flex items-start gap-2">
-				<span class="material-symbols-outlined text-error text-sm mt-0.5">warning</span>
-				<p class="text-xs text-on-surface-variant">{generated.risks.length} risque(s) identifié(s)</p>
+			<div class="space-y-2">
+				<div class="flex items-start gap-2">
+					<span class="material-symbols-outlined text-error text-sm mt-0.5">warning</span>
+					<p class="text-xs text-on-surface-variant">{generated.risks.length} risque(s) identifié(s)</p>
+				</div>
+				<ul class="space-y-1 pl-5 list-disc marker:text-error">
+					{#each generated.risks as risk}
+						<li class="text-xs text-on-surface-variant leading-relaxed">{risk}</li>
+					{/each}
+				</ul>
 			</div>
 		{/if}
 	</div>

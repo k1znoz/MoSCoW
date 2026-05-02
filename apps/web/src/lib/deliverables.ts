@@ -16,20 +16,32 @@ function isTrue(value: string | string[] | boolean | undefined): boolean {
   return value === true || value === 'true' || value === 'oui'
 }
 
+function lower(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+function hasText(value: string | string[] | boolean | undefined): boolean {
+  return asString(value).trim().length > 0
+}
+
 export function buildDeliverables(answers: Answers): GeneratedDeliverables {
-  const projectType = asString(answers.project_type)
-  const sitemap: string[] = ['Accueil', 'A propos', 'Contact', 'Mentions legales', 'Politique de confidentialite']
+  const projectType = lower(asString(answers.project_type))
+  const sitemap: string[] = ['Accueil', 'À propos', 'Contact', 'Mentions légales', 'Politique de confidentialité']
 
-  if (projectType === 'ecommerce') {
-    sitemap.push('Boutique', 'Categorie produit', 'Fiche produit', 'Panier', 'Paiement', 'Compte client')
+  if (projectType === 'e-commerce') {
+    sitemap.push('Boutique', 'Catégorie produit', 'Fiche produit', 'Panier', 'Paiement', 'Compte client')
   }
 
-  if (projectType === 'reservation' || isTrue(answers.needs_booking)) {
-    sitemap.push('Reserver', 'Confirmation reservation', 'Gestion reservation')
+  if (projectType === 'application web/mobile' || projectType === 'espace client' || isTrue(answers.needs_auth)) {
+    sitemap.push('Connexion', 'Compte utilisateur')
   }
 
-  if (projectType === 'lead_gen') {
-    sitemap.push('Offres', 'Etude de cas', 'Demande de devis')
+  if (isTrue(answers.needs_booking)) {
+    sitemap.push('Réserver', 'Confirmation réservation', 'Gestion réservation')
+  }
+
+  if (projectType === 'site vitrine') {
+    sitemap.push('Services', 'Demande de devis')
   }
 
   if (isTrue(answers.needs_blog)) {
@@ -37,48 +49,72 @@ export function buildDeliverables(answers: Answers): GeneratedDeliverables {
   }
 
   const must = [
-    'Sitemap v1 valide',
-    'Pages legales en place',
-    'Formulaire de conversion principal',
-    'Export final Markdown + PDF',
+    'Sitemap v1 validé',
+    'Pages légales en place',
+    'Parcours principal du client clarifié',
+    'Compte-rendu de cadrage validé',
   ]
 
-  if (isTrue(answers.needs_payment)) {
-    must.push('Paiement securise (sandbox + prod)')
+  if (asString(answers.payment_methods).trim().length > 0) {
+    must.push('Paiement sécurisé (sandbox + prod)')
   }
 
   if (isTrue(answers.needs_auth)) {
     must.push('Authentification et gestion de session')
   }
 
-  const should = ['Tracking analytics configure', 'Tableau de bord de leads']
-  const could = ['Chat en ligne', 'Scenarios de relance marketing']
-  const wont = ['Refonte complete branding en phase v1']
+  const should = ['Suivi des performances configuré', 'Contenus prioritaires prêts']
+  const could = ['FAQ dynamique', 'Automatisations marketing']
+  const wont = ['Refonte complète branding en phase v1']
 
   const contentChecklist = [
-    'Logo (SVG ou PNG haute resolution)',
+    'Logo (SVG ou PNG haute résolution)',
     'Textes finaux par page',
     'Images principales et secondaires',
-    'Mentions legales / politique confidentialite',
-    'Coordonnees de contact verifiees',
+    'Mentions légales / politique de confidentialité',
+    'Coordonnées de contact vérifiées',
   ]
+
+  if (!isTrue(answers.has_existing_content)) {
+    contentChecklist.push('Collecte des contenus manquants (textes/photos)')
+  }
 
   if (isTrue(answers.needs_blog)) {
     contentChecklist.push('3 articles blog de lancement')
   }
 
-  const risks = [
-    'Retard de livraison contenu client',
-    'Decisionnaires multiples sans validation claire',
-    'Perimetre fonctionnel qui derive apres cadrage',
-  ]
+  const risks: string[] = []
 
-  if (asString(answers.tracking_tools).trim() === '') {
-    risks.push('Tracking non defini: mesure de performance limitee')
+  if (!isTrue(answers.has_existing_content)) {
+    risks.push('Contenu non disponible à ce stade : risque de retard sur le planning de production.')
+  }
+
+  const decisionMakers = lower(asString(answers.decision_makers))
+  if (!hasText(answers.decision_makers)) {
+    risks.push('Décideur non identifié : risque de validation tardive.')
+  } else if (
+    decisionMakers.includes('plusieur') ||
+    decisionMakers.includes('equipe') ||
+    decisionMakers.includes('équipe') ||
+    decisionMakers.includes('on verra')
+  ) {
+    risks.push('Validation potentiellement partagée : risque d allers-retours et de décisions contradictoires.')
+  }
+
+  if (!hasText(answers.must_features) || !hasText(answers.primary_action)) {
+    risks.push('Besoin principal encore flou : risque de dérive du périmètre.')
+  }
+
+  if (!isTrue(answers.tracking_tools)) {
+    risks.push('Tracking non défini : mesure de performance limitée.')
   }
 
   if (isTrue(answers.sensitive_data)) {
-    risks.push('Donnees sensibles annoncees: revue conformite a faire avant build')
+    risks.push('Données sensibles annoncées : revue conformité à faire avant build.')
+  }
+
+  if (isTrue(answers.collects_personal_data) && !isTrue(answers.needs_gdpr)) {
+    risks.push('Collecte de données personnelles sans accompagnement RGPD : risque juridique à cadrer en amont.')
   }
 
   return {

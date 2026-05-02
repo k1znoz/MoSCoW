@@ -36,7 +36,8 @@ export function buildMarkdown(
   generated: GeneratedDeliverables
 ): string {
   const now = new Date().toISOString()
-  const sectionBlocks = sections.map((section) => sectionToMarkdown(section, answers)).join('\n\n')
+  const nonEmptySections = sections.filter((section) => section.questions.length > 0)
+  const sectionBlocks = nonEmptySections.map((section) => sectionToMarkdown(section, answers)).join('\n\n')
 
   return [
     '# Dossier de cadrage client',
@@ -74,6 +75,7 @@ export function buildPrintableHtml(
   generated: GeneratedDeliverables
 ): string {
   const sectionHtml = sections
+    .filter((section) => section.questions.length > 0)
     .map((section) => {
       const rows = section.questions
         .map((question) => {

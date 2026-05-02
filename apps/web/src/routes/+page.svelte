@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {QUESTION_SECTIONS} from '$lib/questionnaire'
+	import {isQuestionVisible, QUESTION_SECTIONS} from '$lib/questionnaire'
 	import type {Answers} from '$lib/types'
 	import {buildDeliverables} from '$lib/deliverables'
 	import {buildMarkdown, buildPrintableHtml} from '$lib/exports'
@@ -20,11 +20,20 @@
 	const sections = QUESTION_SECTIONS
 
 	const currentSection = $derived(sections[currentSectionIndex])
+	const visibleQuestions = $derived(currentSection.questions.filter((question) => isQuestionVisible(question, answers)))
+	const visibleSections = $derived(
+		sections
+			.map((section) => ({
+				...section,
+				questions: section.questions.filter((question) => isQuestionVisible(question, answers)),
+			}))
+			.filter((section) => section.questions.length > 0)
+	)
 	const isFirstSection = $derived(currentSectionIndex === 0)
 	const isLastSection = $derived(currentSectionIndex === sections.length - 1)
 	const generated = $derived(buildDeliverables(answers))
-	const markdown = $derived(buildMarkdown(sections, answers, generated))
-	const printableHtml = $derived(buildPrintableHtml(sections, answers, generated))
+	const markdown = $derived(buildMarkdown(visibleSections, answers, generated))
+	const printableHtml = $derived(buildPrintableHtml(visibleSections, answers, generated))
 
 	$effect(() => {
 		if (typeof window === 'undefined') {
@@ -57,6 +66,10 @@
 	function sectionIsValid(index: number): boolean {
 		const section = sections[index]
 		return section.questions.every((question) => {
+			if (!isQuestionVisible(question, answers)) {
+				return true
+			}
+
 			if (!question.required) {
 				return true
 			}
@@ -110,7 +123,7 @@
 	function openPrintableExport(): void {
 		const popup = window.open('', '_blank', 'noopener,noreferrer')
 		if (!popup) {
-			submissionStatus = 'Impossible d ouvrir la fenetre d impression. Autorise les popups puis reessaie.'
+			submissionStatus = 'Impossible d\'ouvrir la fenêtre d\'impression. Autorise les pop-ups, puis réessaie.'
 			return
 		}
 
@@ -142,10 +155,10 @@
 			}
 
 			submissionStatus =
-				'Submission enregistree dans Sanity. Tu peux maintenant traiter et supprimer depuis le Studio.'
+				'Soumission enregistrée dans Sanity. Tu peux maintenant la traiter et la supprimer depuis le Studio.'
 			window.localStorage.removeItem(STORAGE_KEY)
 		} catch {
-			submissionStatus = 'Echec de sauvegarde Sanity. Verifie la configuration des variables serveur.'
+			submissionStatus = 'Échec de sauvegarde Sanity. Vérifie la configuration des variables serveur.'
 		} finally {
 			isSubmitting = false
 		}
@@ -183,7 +196,7 @@
 		<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
 			<!-- Main questions column -->
 			<div class="md:col-span-8 space-y-6">
-				{#each currentSection.questions as question}
+				{#each visibleQuestions as question}
 					<div class="bg-surface-container rounded-lg border border-outline-variant p-8 shadow-xl relative overflow-hidden group">
 						<div class="absolute top-0 left-0 w-full h-1 bg-primary-container/20 group-hover:bg-primary-container transition-colors duration-500"></div>
 
@@ -240,6 +253,7 @@
 							<span class="px-3 py-1 bg-primary text-on-primary font-label-sm rounded-full text-[10px] uppercase">Must: Clarté</span>
 							<span class="px-3 py-1 border border-secondary text-secondary font-label-sm rounded-full text-[10px] uppercase">Should: Précision</span>
 							<span class="px-3 py-1 border border-outline text-outline font-label-sm rounded-full text-[10px] uppercase">Could: Détails</span>
+							<span class="px-3 py-1 border border-slate-700 text-slate-500 font-label-sm rounded-full text-[10px] uppercase opacity-60">Won't: Hors périmètre</span>
 						</div>
 					</div>
 				{/if}
