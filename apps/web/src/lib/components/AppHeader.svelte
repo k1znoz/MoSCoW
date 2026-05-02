@@ -4,8 +4,4 @@
 		<a href="/" class="text-amber-500 font-bold hover:text-amber-400 transition-colors duration-300 active:scale-95">Projet</a>
 		<a href="https://portfolio-alois.vercel.app/" target="_blank" rel="noreferrer" class="text-slate-400 hover:text-amber-400 transition-colors duration-300 active:scale-95">Portfolio</a>
 	</nav>
-	<div class="flex items-center space-x-4">
-		<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-amber-400 transition-colors">help</span>
-		<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-amber-400 transition-colors">account_circle</span>
-	</div>
 </header>

@@ -65,8 +65,8 @@
 				<span class="material-symbols-outlined text-outline text-xl">person</span>
 			</div>
 			<div>
-				<p class="text-[10px] font-bold text-on-surface normal-case tracking-normal">Maitre Artisan</p>
-				<p class="text-[9px] text-slate-500 normal-case tracking-normal">Prêt pour la forge</p>
+				<p class="text-[10px] font-bold text-on-surface normal-case tracking-normal">Developpeur web</p>
+				<p class="text-[9px] text-slate-500 normal-case tracking-normal">A votre ecoute</p>
 			</div>
 		</div>
 	</div>
