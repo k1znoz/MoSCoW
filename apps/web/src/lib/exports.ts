@@ -60,6 +60,11 @@ export function buildMarkdown(
     '### Wont',
     ...generated.moscow.wont.map((entry) => `- ${entry}`),
     '',
+    '## Recommandations UX',
+    ...(generated.uxRecommendations.length
+      ? generated.uxRecommendations.map((entry) => `- ${entry}`)
+      : ['- Aucune recommandation spécifique détectée pour ce point.']),
+    '',
     '## Checklist contenu',
     ...generated.contentChecklist.map((entry) => `- ${entry}`),
     '',
@@ -127,6 +132,14 @@ export function buildPrintableHtml(
     <h3>Should</h3>${list(generated.moscow.should)}
     <h3>Could</h3>${list(generated.moscow.could)}
     <h3>Wont</h3>${list(generated.moscow.wont)}
+  </section>
+  <section>
+    <h2>Recommandations UX</h2>
+    ${list(
+      generated.uxRecommendations.length
+        ? generated.uxRecommendations
+        : ['Aucune recommandation spécifique détectée pour ce point.']
+    )}
   </section>
   <section>
     <h2>Checklist contenu</h2>

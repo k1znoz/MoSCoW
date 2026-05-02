@@ -3,7 +3,6 @@
 	<nav class="hidden md:flex items-center space-x-8">
 		<a href="/" class="text-amber-500 font-bold hover:text-amber-400 transition-colors duration-300 active:scale-95">Projet</a>
 		<a href="https://portfolio-alois.vercel.app/" target="_blank" rel="noreferrer" class="text-slate-400 hover:text-amber-400 transition-colors duration-300 active:scale-95">Portfolio</a>
-		<a href="https://portfolio-alois.vercel.app/#expertise" target="_blank" rel="noreferrer" class="text-slate-400 hover:text-amber-400 transition-colors duration-300 active:scale-95">Expertise</a>
 	</nav>
 	<div class="flex items-center space-x-4">
 		<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-amber-400 transition-colors">help</span>

@@ -66,6 +66,21 @@ export function buildDeliverables(answers: Answers): GeneratedDeliverables {
   const should = ['Suivi des performances configuré', 'Contenus prioritaires prêts']
   const could = ['FAQ dynamique', 'Automatisations marketing']
   const wont = ['Refonte complète branding en phase v1']
+  const risks: string[] = []
+  const uxRecommendations: string[] = []
+
+  const digitalLevel = lower(asString(answers.digital_level))
+  if (digitalLevel.includes('début')) {
+    uxRecommendations.push('Prévoir une interface très simple avec des parcours courts et guidés.')
+    uxRecommendations.push('Ajouter des messages d aide explicites et des confirmations avant les actions sensibles.')
+    risks.push('Public peu à l aise avec le numérique : risque d abandon si l interface est trop dense.')
+  } else if (digitalLevel.includes('interm')) {
+    uxRecommendations.push('Conserver une interface simple, avec quelques options avancées non bloquantes.')
+  } else if (digitalLevel.includes('à l') || digitalLevel.includes('a l')) {
+    uxRecommendations.push('Prévoir des raccourcis et un parcours plus direct pour les utilisateurs réguliers.')
+  } else if (digitalLevel.includes('mélange') || digitalLevel.includes('melange')) {
+    uxRecommendations.push('Prévoir un niveau de lecture double : mode guidé pour novices et navigation rapide pour experts.')
+  }
 
   const contentChecklist = [
     'Logo (SVG ou PNG haute résolution)',
@@ -82,8 +97,6 @@ export function buildDeliverables(answers: Answers): GeneratedDeliverables {
   if (isTrue(answers.needs_blog)) {
     contentChecklist.push('3 articles blog de lancement')
   }
-
-  const risks: string[] = []
 
   if (!isTrue(answers.has_existing_content)) {
     risks.push('Contenu non disponible à ce stade : risque de retard sur le planning de production.')
@@ -120,6 +133,7 @@ export function buildDeliverables(answers: Answers): GeneratedDeliverables {
   return {
     sitemap,
     moscow: {must, should, could, wont},
+    uxRecommendations,
     contentChecklist,
     risks,
   }

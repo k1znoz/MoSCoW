@@ -58,11 +58,6 @@
 		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(answers))
 	})
 
-	function answerAsString(key: string): string {
-		const value = answers[key]
-		return typeof value === 'string' ? value : ''
-	}
-
 	function sectionIsValid(index: number): boolean {
 		const section = sections[index]
 		return section.questions.every((question) => {
@@ -110,30 +105,6 @@
 		}
 	}
 
-	function downloadMarkdown(): void {
-		const blob = new Blob([markdown], {type: 'text/markdown;charset=utf-8'})
-		const url = URL.createObjectURL(blob)
-		const anchor = document.createElement('a')
-		anchor.href = url
-		anchor.download = `${answerAsString('project_name') || 'moscow-projet'}.md`
-		anchor.click()
-		URL.revokeObjectURL(url)
-	}
-
-	function openPrintableExport(): void {
-		const popup = window.open('', '_blank', 'noopener,noreferrer')
-		if (!popup) {
-			submissionStatus = 'Impossible d\'ouvrir la fenêtre d\'impression. Autorise les pop-ups, puis réessaie.'
-			return
-		}
-
-		popup.document.open()
-		popup.document.write(printableHtml)
-		popup.document.close()
-		popup.focus()
-		popup.print()
-	}
-
 	async function submitToSanity(): Promise<void> {
 		isSubmitting = true
 		submissionStatus = ''
@@ -154,8 +125,7 @@
 				throw new Error('Erreur serveur')
 			}
 
-			submissionStatus =
-				'Soumission enregistrée dans Sanity. Tu peux maintenant la traiter et la supprimer depuis le Studio.'
+			submissionStatus = 'Merci, votre demande a bien été envoyée. Nous revenons vers vous rapidement.'
 			window.localStorage.removeItem(STORAGE_KEY)
 		} catch {
 			submissionStatus = 'Échec de sauvegarde Sanity. Vérifie la configuration des variables serveur.'
@@ -163,6 +133,7 @@
 			isSubmitting = false
 		}
 	}
+
 </script>
 
 <svelte:head>
@@ -197,12 +168,20 @@
 			<!-- Main questions column -->
 			<div class="md:col-span-8 space-y-6">
 				{#each visibleQuestions as question}
-					<div class="bg-surface-container rounded-lg border border-outline-variant p-8 shadow-xl relative overflow-hidden group">
+					<div class="bg-surface-container rounded-lg border border-outline-variant p-8 shadow-xl relative overflow-visible group">
 						<div class="absolute top-0 left-0 w-full h-1 bg-primary-container/20 group-hover:bg-primary-container transition-colors duration-500"></div>
 
 						<h3 class="font-h3 text-h3 text-on-surface mb-6 flex items-center gap-3">
 							<span class="material-symbols-outlined text-primary-container">edit_note</span>
 							{question.label}
+							{#if question.help}
+								<span class="relative inline-flex items-center group/help">
+									<span class="material-symbols-outlined text-sm text-secondary cursor-help">help</span>
+									<span class="pointer-events-none absolute left-0 top-full z-20 mt-2 w-72 rounded-md border border-outline-variant bg-surface-container-high p-3 text-xs font-normal normal-case tracking-normal leading-relaxed text-on-surface-variant opacity-0 translate-y-1 transition-all duration-200 group-hover/help:opacity-100 group-hover/help:translate-y-0 group-focus-within/help:opacity-100 group-focus-within/help:translate-y-0">
+										{question.help}
+									</span>
+								</span>
+							{/if}
 							{#if question.required}
 								<span class="text-error text-xs ml-1">*</span>
 							{/if}
@@ -216,12 +195,6 @@
 							}}
 						/>
 
-						{#if question.help}
-							<p class="text-xs text-on-surface-variant mt-4 italic flex items-center gap-2">
-								<span class="material-symbols-outlined text-sm">info</span>
-								{question.help}
-							</p>
-						{/if}
 					</div>
 				{/each}
 			</div>
@@ -284,20 +257,6 @@
 				</button>
 			{:else}
 				<div class="flex flex-wrap gap-3">
-					<button
-						onclick={downloadMarkdown}
-						class="px-6 py-3 border border-outline-variant text-on-surface font-label-sm uppercase tracking-widest hover:bg-surface-bright transition-all active:scale-95 flex items-center gap-2"
-					>
-						<span class="material-symbols-outlined text-sm">download</span>
-						Markdown
-					</button>
-					<button
-						onclick={openPrintableExport}
-						class="px-6 py-3 border border-outline-variant text-on-surface font-label-sm uppercase tracking-widest hover:bg-surface-bright transition-all active:scale-95 flex items-center gap-2"
-					>
-						<span class="material-symbols-outlined text-sm">print</span>
-						PDF
-					</button>
 					<button
 						onclick={submitToSanity}
 						disabled={isSubmitting}

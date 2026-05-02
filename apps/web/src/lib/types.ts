@@ -30,6 +30,7 @@ export type GeneratedDeliverables = {
     could: string[]
     wont: string[]
   }
+  uxRecommendations: string[]
   contentChecklist: string[]
   risks: string[]
 }

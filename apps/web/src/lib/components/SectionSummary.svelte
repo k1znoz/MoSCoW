@@ -41,6 +41,20 @@
 				</span>
 			{/if}
 		</div>
+		{#if generated.uxRecommendations.length}
+			<div class="hammered-hr"></div>
+			<div class="space-y-2">
+				<div class="flex items-start gap-2">
+					<span class="material-symbols-outlined text-primary text-sm mt-0.5">checklist</span>
+					<p class="text-xs text-on-surface-variant">{generated.uxRecommendations.length} recommandation(s) UX</p>
+				</div>
+				<ul class="space-y-1 pl-5 list-disc marker:text-primary">
+					{#each generated.uxRecommendations as recommendation}
+						<li class="text-xs text-on-surface-variant leading-relaxed">{recommendation}</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 		{#if generated.risks.length}
 			<div class="hammered-hr"></div>
 			<div class="space-y-2">

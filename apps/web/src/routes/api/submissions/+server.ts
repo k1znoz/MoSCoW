@@ -9,7 +9,13 @@ type SubmissionPayload = {
   exportHtml: string
 }
 
-const PROJECT_TYPES = new Set(['vitrine', 'lead_gen', 'ecommerce', 'reservation', 'client_space'])
+const PROJECT_TYPE_MAP: Record<string, string> = {
+  'Site vitrine': 'vitrine',
+  'E-commerce': 'ecommerce',
+  'Application web/mobile': 'reservation',
+  'Espace client': 'client_space',
+  Autre: 'lead_gen',
+}
 
 function addDays(baseDate: Date, days: number): Date {
   const output = new Date(baseDate)
@@ -47,7 +53,8 @@ export const POST: RequestHandler = async ({request}) => {
   try {
     const client = getSanityWriteClient()
     const now = new Date()
-    const projectType = getString(payload.answers.project_type)
+    const projectTypeRaw = getString(payload.answers.project_type)
+    const projectType = PROJECT_TYPE_MAP[projectTypeRaw]
 
     const document = {
       _type: 'submission',
@@ -59,7 +66,7 @@ export const POST: RequestHandler = async ({request}) => {
       clientEmail: getOptionalString(payload.answers.client_email),
       clientPhone: getOptionalString(payload.answers.client_phone),
       projectName,
-      projectType: PROJECT_TYPES.has(projectType) ? projectType : undefined,
+      projectType,
       budgetRange: getOptionalString(payload.answers.budget_range),
       deadline: getOptionalDate(payload.answers.launch_deadline),
       answersJson: JSON.stringify(payload.answers, null, 2),
@@ -71,7 +78,29 @@ export const POST: RequestHandler = async ({request}) => {
     const created = await client.create(document)
     return json({ok: true, id: created._id})
   } catch (error) {
-    console.error('Sanity submission failed:', error)
+    const err = error as {message?: string; statusCode?: number; details?: unknown}
+    console.error('Sanity submission failed:', {
+      message: err?.message,
+      statusCode: err?.statusCode,
+      details: err?.details,
+    })
+
+    if (err?.message?.includes('Missing SANITY_PROJECT_ID') || err?.message?.includes('SANITY_WRITE_TOKEN')) {
+      return json({error: 'Configuration serveur Sanity manquante.'}, {status: 500})
+    }
+
+    if (err?.statusCode === 401) {
+      return json({error: 'Token Sanity invalide ou expiré.'}, {status: 502})
+    }
+
+    if (err?.statusCode === 403) {
+      return json({error: 'Token Sanity sans permission d écriture sur ce dataset.'}, {status: 502})
+    }
+
+    if (err?.statusCode === 404) {
+      return json({error: 'Projet ou dataset Sanity introuvable. Vérifie SANITY_PROJECT_ID et SANITY_DATASET.'}, {status: 502})
+    }
+
     return json({error: 'Impossible de sauvegarder dans Sanity'}, {status: 502})
   }
 }
