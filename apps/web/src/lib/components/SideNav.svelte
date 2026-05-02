@@ -9,10 +9,10 @@
 
 	const NAV_PHASES: NavPhase[] = [
 		{ id: 'intro', label: 'Introduction', icon: 'chef_hat', fromIndex: 0, toIndex: 1 },
-		{ id: 'goals', label: 'Goal Setting', icon: 'target', fromIndex: 2, toIndex: 3 },
-		{ id: 'features', label: 'Feature Selection', icon: 'construction', fromIndex: 4, toIndex: 5 },
-		{ id: 'content', label: 'Content Readiness', icon: 'description', fromIndex: 6, toIndex: 7 },
-		{ id: 'budget', label: 'Budget & Timeline', icon: 'payments', fromIndex: 8, toIndex: 8 },
+		{ id: 'goals', label: 'Objectifs', icon: 'target', fromIndex: 2, toIndex: 3 },
+		{ id: 'features', label: 'Fonctionnalites', icon: 'construction', fromIndex: 4, toIndex: 5 },
+		{ id: 'content', label: 'Contenu', icon: 'description', fromIndex: 6, toIndex: 7 },
+		{ id: 'budget', label: 'Budget & Delais', icon: 'payments', fromIndex: 8, toIndex: 8 },
 	]
 
 	interface Props {
@@ -32,7 +32,7 @@
 <aside class="fixed left-0 top-0 h-full flex flex-col pt-20 bg-zinc-950 font-serif text-sm uppercase tracking-widest border-r border-slate-800 w-64 z-40 hidden lg:flex">
 	<div class="px-6 mb-8">
 		<h2 class="text-xl font-black text-orange-600">Project Forge</h2>
-		<p class="text-[10px] text-slate-500 mt-1">Onboarding Phase</p>
+		<p class="text-[10px] text-slate-500 mt-1">Phase de cadrage</p>
 	</div>
 
 	<nav class="flex flex-col flex-1">

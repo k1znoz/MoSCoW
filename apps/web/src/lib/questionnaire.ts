@@ -54,14 +54,6 @@ export const QUESTION_SECTIONS: QuestionSection[] = [
         inputType: 'textarea',
         required: true,
       },
-      {key: 'launch_deadline', label: 'Y a-t-il une date limite ?', inputType: 'date'},
-      {
-        key: 'budget_range',
-        label: 'Budget approximatif',
-        inputType: 'select',
-        options: ['Moins de 1k', '1k à 2k', '2k à 4k', '4k à 8k', '8k et plus', 'À définir'],
-        help: 'Un ordre de grandeur suffit. Cela nous aide à proposer un périmètre réaliste.',
-      },
     ],
   },
   {
@@ -248,6 +240,14 @@ export const QUESTION_SECTIONS: QuestionSection[] = [
     key: 'delivery',
     title: 'Validation et collaboration',
     questions: [
+      {key: 'launch_deadline', label: 'Y a-t-il une date limite ?', inputType: 'date'},
+      {
+        key: 'budget_range',
+        label: 'Budget approximatif',
+        inputType: 'select',
+        options: ['Moins de 1k', '1k à 2k', '2k à 4k', '4k à 8k', '8k et plus', 'À définir'],
+        help: 'Un ordre de grandeur suffit. Cela nous aide à proposer un périmètre réaliste.',
+      },
       {
         key: 'decision_makers',
         label: 'Qui valide le projet de votre côté ?',

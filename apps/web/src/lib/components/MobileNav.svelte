@@ -1,10 +1,10 @@
 <script lang="ts">
 	const NAV_ITEMS = [
 		{ label: 'Intro', icon: 'chef_hat', fromIndex: 0, toIndex: 1 },
-		{ label: 'But', icon: 'target', fromIndex: 2, toIndex: 3 },
-		{ label: 'Forge', icon: 'construction', fromIndex: 4, toIndex: 5 },
+		{ label: 'Objectifs', icon: 'target', fromIndex: 2, toIndex: 3 },
+		{ label: 'Fonctions', icon: 'construction', fromIndex: 4, toIndex: 5 },
 		{ label: 'Contenu', icon: 'description', fromIndex: 6, toIndex: 7 },
-		{ label: 'Devis', icon: 'payments', fromIndex: 8, toIndex: 8 },
+		{ label: 'Budget', icon: 'payments', fromIndex: 8, toIndex: 8 },
 	]
 
 	interface Props {
