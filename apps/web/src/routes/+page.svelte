@@ -82,6 +82,12 @@
 		})
 	}
 
+	function scrollToTop(): void {
+		if (typeof window !== 'undefined') {
+			window.scrollTo({top: 0, behavior: 'smooth'})
+		}
+	}
+
 	function nextSection(): void {
 		if (!sectionIsValid(currentSectionIndex)) {
 			submissionStatus = 'Merci de remplir les champs requis avant de continuer.'
@@ -90,19 +96,19 @@
 
 		submissionStatus = ''
 		currentSectionIndex = Math.min(currentSectionIndex + 1, sections.length - 1)
+		scrollToTop()
 	}
 
 	function previousSection(): void {
 		submissionStatus = ''
 		currentSectionIndex = Math.max(currentSectionIndex - 1, 0)
+		scrollToTop()
 	}
 
 	function goToSection(index: number): void {
 		submissionStatus = ''
 		currentSectionIndex = Math.max(0, Math.min(index, sections.length - 1))
-		if (typeof window !== 'undefined') {
-			window.scrollTo({top: 0, behavior: 'smooth'})
-		}
+		scrollToTop()
 	}
 
 	async function submitToSanity(): Promise<void> {
